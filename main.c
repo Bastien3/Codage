@@ -5,20 +5,22 @@
 
 int main() {
 	
-	char *message;
+	char *message, *messageDecode;
 	int tailleOccur;
 	occur_t *tableauOccurrences;
 	intervalle_t *listeIntervalles;
-	intervalleCode_t intervalleCode;
+	double messageCode;
 	
 	message = saisirMessage();
-	printf("%s\n", message);
 	tableauOccurrences = compterOccurrencesMessage(message, &tailleOccur);
-	listeIntervalles = initialiserListeIntervalles(tableauOccurrences, sizeof(message), tailleOccur);
-	afficherListeIntervalles(listeIntervalles, sizeof(message), tailleOccur);
-	intervalleCode = coderMessage(listeIntervalles, message);
-	printf("Message codé : %.10lf\n", intervalleCode.gauche);
+	listeIntervalles = initialiserListeIntervalles(tableauOccurrences, strlen(message), tailleOccur);
+	afficherListeIntervalles(listeIntervalles, strlen(message), tailleOccur);
+	messageCode = coderMessage(listeIntervalles, message);
+	printf("\nMessage codé : %.10lf\n", messageCode);
+	messageDecode = decoderMessage(listeIntervalles, messageCode, strlen(message));
+	printf("\nMessage décodé : %s\n", messageDecode);
 	detruireMessage(message);
+	detruireMessage(messageDecode);
 	detruireOccurrences(tableauOccurrences);
 	
 	return 0;

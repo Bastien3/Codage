@@ -50,7 +50,7 @@ void detruireOccurrences(occur_t * liste);
 
 
 /*
- *	Etape 2 : On calcule les probabilités d'apparition des caractères dans le mot
+ *	Etape 2 : On calcule les probabilités d'apparition des caractères dans le mot et on crée le tableau des intervalles correspondant 
  */
 
 /* Création de la liste des intervalles */
@@ -68,19 +68,17 @@ void detruireIntervalles(intervalle_t *liste);
 
 
 /*
- *	Etape 3 : On code le mot avec la probabilité totale d'apparition de ses caractères
+ *	Etape 3 : On code le mot avec le tableau des intervalles de chaque lettre 
  */
 
 /* Codage du message grâce à la liste des intervalles (renvoi d'une probabilité d'apparition du caractère) */
-intervalleCode_t coderMessage(intervalle_t *liste, char* message);
+double coderMessage(intervalle_t *liste, char* message);
 
 
 
 /*
- *	Etape 4 : On décode le mot avec la probabilité totale d'apparition de ses caractères
+ *	Etape 4 : On décode le mot avec le nombre codé et le tableau des intervalles
  */
 
-// à compléter
-//char * decoderMessage(float probabilite);
-
+char *decoderMessage(intervalle_t *liste, double messageCode, int tailleMessage);
 #endif
