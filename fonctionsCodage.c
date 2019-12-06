@@ -1,7 +1,6 @@
 #include "fonctionsCodage.h"
 #include "filtabci.h"
 #include <stdio.h>
-#include <stdlib.h>
 
 /* Calcule un xor entre 2 bits */
 int xor(int a, int b) {
@@ -35,7 +34,18 @@ void sequenceAfficher(int *sequence, int tailleSequence) {
     printf("\n");
 }
 
-/* Crée la file circulaire contenant la séquence e longueur maximale de départ */
+/* Permet d'inverser une séquence */
+void sequenceInverser(int *sequence, int tailleSequence) {
+
+    int i, j, temp;
+    for (i = 0, j = tailleSequence - 1 ; i < j ; i++, j--) {
+    	temp = sequence[i];
+    	sequence[i] = sequence[j];
+    	sequence[j] = temp;
+    }
+}
+
+/* Crée la file circulaire contenant la séquence de longueur maximale de départ */
 void longueurMaximaleGenerer(FFILE f, int* sequenceInitialisation, int tailleSequence) {
 
     int i;
@@ -47,18 +57,16 @@ void longueurMaximaleGenerer(FFILE f, int* sequenceInitialisation, int tailleSeq
 void listeSequencesGenerer(FFILE f, int* sequencePolynomes, int tailleSequence, int *sequenceCodee, int nombreSequences) {
 
         int i, j;
-        int* sequence = malloc(sizeof(int) * tailleSequence);
         int bitAAjouter = 0; /* Bit à ajouter au début de la séquence */
 
         for (i = 0 ; i < nombreSequences ; i++) {
+        	/* On affiche la séquence qu'on vient de générer */
             printf("\n");
             FileAfficher(f);
-            for (j = 0 ; j < tailleSequence ; j++)
-                if (sequencePolynomes[j]) { /* Calcul du bit à ajouter au début de la séquence */
-                    printf(" [%d %d]", j, f->elements[j]);
-                    bitAAjouter = xor(bitAAjouter, f->elements[j]);
-                }
-            printf(" -> %d\n", bitAAjouter);
+            for (j = 0 ; j < tailleSequence ; j++) /* Calcul du bit à ajouter au début de la séquence */
+                if (sequencePolynomes[j]) /* On fait un XOR entre les bits qui sont à considérer d'après le polynôme */
+                    bitAAjouter = xor(bitAAjouter, f->elements[(j + f->debut) % f->longMax]);
+            /* On décale la séquence actuelle pour y ajouter le bit calculé */
             sequenceCodee[i] = FileSortir(f);
             FileEntrer(bitAAjouter, f);
             bitAAjouter = 0;

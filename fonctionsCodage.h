@@ -18,6 +18,9 @@ void sequenceAfficher(int *sequence, int tailleSequence);
 /* Extrait une séquence de la file de longueur maximale */
 void sequenceExtraire(FFILE f, int *sequence, int tailleSequence);
 
+/* Permet d'inverser une séquence */
+void sequenceInverser(int *sequence, int tailleSequence);
+
 /* Crée la file circulaire contenant la séquence e longueur maximale de départ */
 void longueurMaximaleGenerer(FFILE f, int* sequenceInitialisation, int tailleSequence);
 
