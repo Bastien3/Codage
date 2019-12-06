@@ -1,8 +1,19 @@
 main : main.o arithmetique.o
 	gcc main.o arithmetique.o -o main
+longueurMaximale : longueurMaximale.o filtabci.o element.o fonctionsCodage.o
+	gcc longueurMaximale.o filtabci.o element.o fonctionsCodage.o -o longueurMaximale
+longueurMaximale.o : longueurMaximale.c
+	gcc -c longueurMaximale.c
+filtabci.o : filtabci.c
+	gcc -c filtabci.c
+element.o : element.c
+	gcc -c element.c
 main.o : main.c
 	gcc -c main.c
 arithmetique.o : arithmetique.c
 	gcc -c arithmetique.c
-clean : 
+fonctionsCodage.o : fonctionsCodage.c
+	gcc -c fonctionsCodage.c
+all : main longueurMaximale clean
+clean :
 	rm *.o
