@@ -57,6 +57,8 @@ occur_t * compterOccurrencesMessage(char * msg, int *tailleOccur) {
 	
 	enMajuscules(msg);
 	
+	printf("\nEtablissement du tableau de statistiques d'apparition de chaque lettre dans le mot.\n");
+	
 	/* Comptage des occurrences */
 	/* On parcourt chaque lettre du message */
 	for (i = 0 ; i < tailleMsg ; i++) {
@@ -76,29 +78,7 @@ occur_t * compterOccurrencesMessage(char * msg, int *tailleOccur) {
 				}
 		}
 	}
-	afficherTableauOccurrences(repets, *tailleOccur);
-	printf("\n\nTri bulle...\n\n");
 	
-	/* Tri bulle alphabétique des caractères */
-  	int passage = 0;
-    bool permutation = true;
-    int en_cours;
-       
-    while (permutation) {
-        permutation = false;
-        passage++;
-        for (en_cours = 0 ; en_cours < *tailleOccur - passage ; en_cours++) {
-            if (repets[en_cours].carac > repets[en_cours + 1].carac) {
-                permutation = true;
-                // on echange les deux elements
-                temp = repets[en_cours];
-                repets[en_cours] = repets[en_cours + 1];
-                repets[en_cours + 1] = temp;
-            }
-        }
-    }
-
-
 	afficherTableauOccurrences(repets, *tailleOccur);
 	repets = realloc(repets, sizeof(occur_t) * tailleMsg);
 	return repets;
@@ -107,6 +87,7 @@ occur_t * compterOccurrencesMessage(char * msg, int *tailleOccur) {
 /* Affichage du tableau des occurrences */
 void afficherTableauOccurrences(occur_t *repets, int tailleMsg) {
 	
+	printf("\n");
 	for(int i = 0; i < tailleMsg; i++)
 		printf("Caractère \"%c\" identifié %i fois\n", repets[i].carac, repets[i].occurrence);
 	printf("\n");
@@ -127,7 +108,7 @@ intervalle_t * creerListeIntervalles(occur_t *repets, int tailleTabOccurrences) 
 	int i;	
 	intervalle_t *tab = malloc(tailleTabOccurrences * sizeof(intervalle_t));
 	
-	/* On remplit les informations concernant le caractère étudié (lettre, nombre d'occurences) pour chaque intervalle */
+	/* On remplit les informations concernant le caractère étudié (lettre, nombre d'occurrences) pour chaque intervalle */
 	/* Les intervalles ne sont pas encore calculés */
 	for(i = 0; i < tailleTabOccurrences; i++) {
 			tab[i].carac = malloc(sizeof(occur_t));
@@ -144,6 +125,8 @@ intervalle_t * initialiserListeIntervalles(occur_t *repets, int tailleMsg, int t
 	double valeur = 0;
 	int i;
 	
+	printf("Création du tableau d'intervalles de chaque lettre du mot.\n");
+	
 	for (i = 0 ; i < tailleOccur ; i++) {
 		liste[i].debut = valeur;
 		valeur += (double)liste[i].carac->occurrence / tailleMsg;
@@ -156,13 +139,13 @@ intervalle_t * initialiserListeIntervalles(occur_t *repets, int tailleMsg, int t
 /* Affichage de la liste des intervalles */
 void afficherListeIntervalles(intervalle_t *intervs, int tailleMsg, int tailleOccur) {
 
-	for(int i = 0; i < tailleOccur; i++)
-		if(intervs[i].carac->occurrence > 0) {
-			printf("Caractère \"%c\"\n", intervs[i].carac->carac);
-			printf("\tFréquence d'apparition = (%i/%i)\n", intervs[i].carac->occurrence, tailleMsg);
-			printf("\tIntervalle : [%lf ; %lf[\n\n", intervs[i].debut, intervs[i].fin);
-		}
+	int i;
 	printf("\n");
+	for(i = 0; i < tailleOccur; i++) {
+		printf("Caractère \"%c\"\n", intervs[i].carac->carac);
+		printf("\tFréquence d'apparition = (%i/%i)\n", intervs[i].carac->occurrence, tailleMsg);
+		printf("\tIntervalle : [%lf ; %lf[\n\n", intervs[i].debut, intervs[i].fin);
+	}
 }
 
 /* Destruction d'une structure d'intervalles */
@@ -178,58 +161,45 @@ void detruireIntervalles(intervalle_t * liste) {
 /* Calcul de l'intervalle issu du code arithmétique */
 /* Le mot codé est la borne gauche */
 /* Complexité O(n²) */
-intervalleCode_t coderMessage(intervalle_t *liste, char* message) {
+double coderMessage(intervalle_t *liste, char* message) {
 
-	intervalleCode_t intervalleCode;
-	double intervalleReference = 1;
-	intervalle_t intervalle;
+	intervalleCode_t intervalleCode; /* L'intervalle de codage */
+	double difference; /* La référence par laquelle multiplier chaque borne de l'intervalle */
+	intervalle_t intervalle; /* Un intervalle temporaire */
 	int i, j;
 	
-	for (j = 0 ; liste[j].carac->carac != message[i] ; j++); /* Recherche de l'intervalle correspondant au caractère courant */
-	intervalle = liste[j];
-	intervalleCode.gauche = intervalle.debut; /* Initialisation de la borne gauche */
-	intervalleCode.droit = intervalle.fin; /* Initialisation de la borne droite */
-		
-	for (i = 1 ; message[i] ; i++) {
-		intervalleReference /= sizeof(message);
+	intervalleCode.gauche = 0;
+	intervalleCode.droit = 1;
+	
+	for (i = 0 ; message[i] ; i++) {
+		difference = intervalleCode.droit - intervalleCode.gauche;
 		for (j = 0 ; liste[j].carac->carac != message[i] ; j++); /* Recherche de l'intervalle correspondant au caractère courant */
 		intervalle = liste[j];
-		intervalleCode.droit = intervalleCode.gauche;
-		intervalleCode.gauche += intervalleReference * intervalle.debut; /* Mise à jour de la borne gauche */
-		intervalleCode.droit += intervalleReference * intervalle.fin; /* Mise à jour de la borne droite */
-		printf("Référence : %.10lf, borne gauche : %.10lf, borne droite : %.10lf\n", intervalleReference, intervalleCode.gauche, intervalleCode.droit);
-		printf("Caractère : %c, début : %lf, fin : %lf\n", intervalle.carac->carac, intervalle.debut, intervalle.fin);
+		intervalleCode.droit = intervalleCode.gauche + difference * intervalle.fin; /* Mise à jour de la borne droite */
+		intervalleCode.gauche += difference * intervalle.debut; /* Mise à jour de la borne gauche */
 	}
 	
-	return intervalleCode;
+	return (intervalleCode.droit + intervalleCode.gauche) / 2;
 }
 
 
 /* Décodage du mot en fonction de l'intervalle envoyé en paramètre */
 /* Complexité O(n²) */
-char *decoderMessage(intervalle_t *liste, char* message, intervalleCode_t intervalleCode) {
+char *decoderMessage(intervalle_t *liste, double messageCode, int tailleMessage) {
 
-	double borneGauche, borneDroite;
-	double intervalleReference = 1;
-	intervalle_t intervalle;
 	int i, j;
+	char *message = malloc(sizeof(char) * tailleMessage); 
+	double probabilite; /* Probabilité d'apparition du caractère courant */
+	double borneInferieure; /* Borne inférieure du caractère courant dans le tableau d'intervalles */
 	
-	for (j = 0 ; liste[j].carac->carac != message[i] ; j++); /* Recherche de l'intervalle correspondant au caractère courant */
-	intervalle = liste[j];
-	borneGauche = intervalle.debut; /* Initialisation de la borne gauche */
-	borneDroite = intervalle.fin; /* Initialisation de la borne droite */
-		
-	for (i = 1 ; message[i] ; i++) {
-		intervalleReference /= sizeof(message);
-		for (j = 0 ; liste[j].carac->carac != message[i] ; j++); /* Recherche de l'intervalle correspondant au caractère courant */
-		intervalle = liste[j];
-		borneDroite = borneGauche;
-		borneGauche += intervalleReference * intervalle.debut; /* Mise à jour de la borne gauche */
-		borneDroite += intervalleReference * intervalle.fin; /* Mise à jour de la borne droite */
-		printf("Référence : %.10lf, borne gauche : %.10lf, borne droite : %.10lf\n", intervalleReference, borneGauche, borneDroite);
-		printf("Caractère : %c, début : %lf, fin : %lf\n", intervalle.carac->carac, intervalle.debut, intervalle.fin);
+	for (i = 0 ; i < tailleMessage ; i++) {
+		for (j = 0 ; messageCode < liste[j].debut || messageCode > liste[j].fin ; j++);  /* Recherche de l'intervalle dans lequel est le mot codé */
+		message[i] = liste[j].carac->carac; /* Ajout du caractère correspondant au message */
+		probabilite = (double)liste[j].carac->occurrence / tailleMessage;
+		borneInferieure = liste[j].debut;
+		messageCode = (messageCode - borneInferieure) / probabilite; /* Actualisation du nombre codé */	
 	}
 	
-	return "xxx";
+	return message;
 }
 
